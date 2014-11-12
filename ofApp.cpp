@@ -1,6 +1,7 @@
 #include "ofApp.h"
 
-// THIS IS A TEST FOR GIT
+// THIS IS A TEST FOR GIT - this should change
+
 
 //--------------------------------------------------------------
 void ofApp::setup(){
@@ -26,8 +27,8 @@ void ofApp::setup(){
     ofSetWindowShape(frameW, frameH*2);
     
     // full screen - redefine for installation screen
-    ofSetFullscreen(false);
-//    ofHideCursor();
+    ofSetFullscreen(true);
+    ofHideCursor();
     
     //    UI Setup
     
