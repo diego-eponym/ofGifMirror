@@ -5,18 +5,18 @@
 void ofApp::setup(){
     
 //  SIZE SETUP
-    screenW = 1200; // SCREEN
+    screenW = 1200; // SCREEN SIZE
     screenH = 1920;
     
-    frameW  = screenW; // VIDEO
-    frameH  = 3*frameW/4;
+    frameW  = 1920; // VIDEO
+    frameH  = 1080;
     
     gifW = 2*screenW/10; // GIF
     gifH = 2*screenH/10;
     
 //  Sketch Setup
     ofBackground(0, 0, 0);
-    ofSetFrameRate(24);
+    ofSetFrameRate(30);
 
 
 
@@ -32,10 +32,10 @@ void ofApp::setup(){
     
     
 // Capture Setup
-    //vid.setVerbose(true);
-    vid.listDevices();
-    vid.setDeviceID(0);
+    
+    vid.setDeviceID(0); // Change webcam here
     vid.initGrabber(frameW,frameH);
+
     
     mirror.allocate(screenW, screenH);
     gifSize.allocate(gifW, gifH);
@@ -96,7 +96,8 @@ void ofApp::update(){
         
     }
     
-//    Video Mirror
+////    Video Mirror - Working - Slow -
+//      Basically, this code works but is really taxing since it's doing three unnecessary transformations - source: http://forum.openframeworks.cc/t/pixel-rotation/10690/3?u=diegozaks
     
     mirror.setFromPixels(vid.getPixels(), frameW, frameH);
     mirror.mirror(0, 1);
@@ -104,14 +105,12 @@ void ofApp::update(){
     mirror.resize(frameW, frameW);
     mirror.rotate(90, frameW/2, frameW/2);
     mirror.resize(1200, 1920);
+//
+//
     
-    gifSize.setFromPixels(vid.getPixels(), frameW, frameH);
-    gifSize.mirror(0, 1);
+    //    Video Mirror - Optimize Test - Have no idea how to get this to work. Source: http://forum.openframeworks.cc/t/pixel-rotation/10690/4?u=diegozaks
     
-    gifSize.resize(frameW, frameW);
-    gifSize.rotate(90, frameW/2, frameW/2);
-    gifSize.resize(gifW, gifH);
-
+//    mirror.getPixelsRef().rotate90To(vid.getPixelsRef(), 1);
     
     
 }
@@ -119,12 +118,15 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::draw(){
     
+
     
     mirror.draw(0, 0);
     
     ofSetColor(255, 255, 255);
     
     displayInstructions();
+    
+        ofDrawBitmapString(ofToString(ofGetFrameRate())+"fps", 10, 15);
     
 }
 
@@ -147,6 +149,13 @@ void ofApp::onGifSaved(string &fileName) {
 
 void ofApp::captureFrame() {
 
+    
+    gifSize.setFromPixels(vid.getPixels(), frameW, frameH);
+    gifSize.mirror(0, 1);
+    
+    gifSize.resize(frameW, frameW);
+    gifSize.rotate(90, frameW/2, frameW/2);
+    gifSize.resize(gifW, gifH);
     
     gifEncoder.addFrame(
                         

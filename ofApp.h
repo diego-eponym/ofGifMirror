@@ -23,12 +23,11 @@ public:
     void gotMessage(ofMessage msg);
 
 //--------------------------------------------------------------
-//    GIF Variables
+//    Video Variables
 //--------------------------------------------------------------
     
-//    ofxGifEncoder - Write
-    
     ofVideoGrabber vid;
+    
     ofxCvColorImage mirror;
     ofxCvColorImage gifSize;
 
