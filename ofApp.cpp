@@ -1,34 +1,38 @@
 #include "ofApp.h"
 
+
+
 // THIS IS A TEST FOR GIT - this should change
 
 
 //--------------------------------------------------------------
 void ofApp::setup(){
     
+    
+    screenW = ofGetScreenWidth();
+    screenH = ofGetScreenHeight();
+    ofSetWindowPosition(screenW/2-300/2, screenH/2-300/2);
+    
+    
+    ofBackground(0, 0, 0);
+    ofSetFrameRate(30);
+
+    
     nFrames = 0;
-    frameW  = 640; // Window size
-    frameH  = 480;
+    frameW  = 1200; // Window size
+    frameH  = 3*frameW/4;
     maxFrames = 5; // Total number of frames for the GIF - Limit
     currentFrame = 0;
     currentGif = 0;
     checkGif = 0;
     
-    vid.setVerbose(true);
+    // vid.setVerbose(true);
     vid.listDevices();
     vid.setDeviceID(0);
     vid.initGrabber(frameW,frameH);
     
     gifEncoder.setup(frameW, frameH, .85, 256);
     ofAddListener(ofxGifEncoder::OFX_GIF_SAVE_FINISHED, this, &ofApp::onGifSaved);
-    
-    ofBackground(0, 0, 0);
-    ofSetFrameRate(30);
-    ofSetWindowShape(frameW, frameH*2);
-    
-    // full screen - redefine for installation screen
-    ofSetFullscreen(true);
-    ofHideCursor();
     
     //    UI Setup
     
@@ -50,12 +54,19 @@ void ofApp::setup(){
 
 //--------------------------------------------------------------
 void ofApp::update(){
+    
+    if(bFullscreen){
+        ofHideCursor();
+    }else{
+        ofShowCursor();
+    }
+    
     vid.update();
     onScreenInst = ofToString(currentFrame) + "/" + ofToString(maxFrames);
 
     if (checkGif != currentGif) {
         
-        ofSleepMillis(1000);
+        ofSleepMillis(1500);
         cout << "There's a new GIF" << endl;
         previousGif.loadMovie(gifName);
         cout << "Loaded to video: " + gifName << endl;
@@ -67,12 +78,20 @@ void ofApp::update(){
     previousGif.update();
     
     
-
+    if(!bFullscreen){
+        proximaNova12.drawString("press f to enter fullscreen", -140 + ofGetWidth()/2, ofGetHeight()/2);
+        proximaNova12.drawString("window is normal", -100 + ofGetWidth()/2, ofGetHeight() - 10);
+    } else {
+        
+    }
     
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
+    
+    ofSetupScreen();
+    
     vid.draw(0, 0);
 
 //    Working on Cropping the video feed through the ofPixel::crop() method, need to find an example.
@@ -148,6 +167,22 @@ void ofApp::displayInstructions(){
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
+    
+    if(key == 'f'){
+        
+        bFullscreen = !bFullscreen;
+        
+        if(!bFullscreen){
+            ofSetWindowShape(frameW,frameH);
+            ofSetFullscreen(false);
+            // figure out how to put the window in the center:
+            int screenW = ofGetScreenWidth();
+            int screenH = ofGetScreenHeight();
+            ofSetWindowPosition(screenW/2-frameW/2, screenH/2-frameH/2);
+        } else if(bFullscreen == 1){
+            ofSetFullscreen(true);
+        }
+    }
     
 }
 
