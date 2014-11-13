@@ -8,34 +8,43 @@
 //--------------------------------------------------------------
 void ofApp::setup(){
     
-    
+//  Screen Setup
     screenW = ofGetScreenWidth();
     screenH = ofGetScreenHeight();
     ofSetWindowPosition(screenW/2-300/2, screenH/2-300/2);
     
-    
+//  Sketch Setup
     ofBackground(0, 0, 0);
     ofSetFrameRate(30);
 
-    
-    nFrames = 0;
+//  Video Variables
     frameW  = 1200; // Window size
     frameH  = 3*frameW/4;
+
+    
+//  GIF Setup
+    nFrames = 0;
     maxFrames = 5; // Total number of frames for the GIF - Limit
     currentFrame = 0;
     currentGif = 0;
     checkGif = 0;
     
-    // vid.setVerbose(true);
+    
+// Capture Setup
+    vid.setVerbose(true);
     vid.listDevices();
     vid.setDeviceID(0);
     vid.initGrabber(frameW,frameH);
+
+    videoMirror = new unsigned char[frameW*frameH*3];
+    mirrorTexture.allocate(frameW, frameH, GL_RGB);
     
+//GIF Capture setup
     gifEncoder.setup(frameW, frameH, .85, 256);
     ofAddListener(ofxGifEncoder::OFX_GIF_SAVE_FINISHED, this, &ofApp::onGifSaved);
     
-    //    UI Setup
     
+//    UI Setup
     baskervilleOldFace30.loadFont("baskerville.ttf", 70, true, true);
     baskervilleOldFace30.setLineHeight(900.0f);
     baskervilleOldFace30.setLetterSpacing(1.037);
@@ -61,8 +70,7 @@ void ofApp::update(){
         ofShowCursor();
     }
     
-    vid.update();
-    onScreenInst = ofToString(currentFrame) + "/" + ofToString(maxFrames);
+      onScreenInst = ofToString(currentFrame) + "/" + ofToString(maxFrames);
 
     if (checkGif != currentGif) {
         
@@ -85,6 +93,29 @@ void ofApp::update(){
         
     }
     
+//    Video Mirror
+    vid.update();
+    if (vid.isFrameNew()) {
+        unsigned char * pixels = vid.getPixels();
+        for (int i = 0; i < frameH; i++) {
+            for (int j = 0; j < frameW*3; j+=3) {
+                // pixel number
+                int pix1 = (i*frameW*3) + j;
+                int pix2 = (i*frameW*3) + (j+1);
+                int pix3 = (i*frameW*3) + (j+2);
+                // mirror pixel number
+                int mir1 = (i*frameW*3)+1 * (frameW*3 - j-3);
+                int mir2 = (i*frameW*3)+1 * (frameW*3 - j-2);
+                int mir3 = (i*frameW*3)+1 * (frameW*3 - j-1);
+                // swap pixels
+                videoMirror[pix1] = pixels[mir1];
+                videoMirror[pix2] = pixels[mir2];
+                videoMirror[pix3] = pixels[mir3];
+            }
+        }
+        mirrorTexture.loadData(videoMirror, frameW, frameH, GL_RGB);
+    }
+    
 }
 
 //--------------------------------------------------------------
@@ -92,7 +123,9 @@ void ofApp::draw(){
     
     ofSetupScreen();
     
-    vid.draw(0, 0);
+//    vid.draw(0, 0);
+    
+    mirrorTexture.draw(0, 0, frameW, frameH);
 
 //    Working on Cropping the video feed through the ofPixel::crop() method, need to find an example.
 //    ofPixelsRef pixelRef = vid.getPixelsRef();

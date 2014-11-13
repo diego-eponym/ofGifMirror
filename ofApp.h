@@ -34,6 +34,13 @@ public:
 //--------------------------------------------------------------
     
     ofVideoGrabber vid;
+    
+    int frameW, frameH;
+    
+//    Mirror & Rotate
+    
+    ofTexture mirrorTexture;
+    unsigned char * videoMirror;
 
     
 //--------------------------------------------------------------
@@ -48,8 +55,7 @@ public:
     
     vector <ofTexture *> txs; // for previewing
     vector <ofxGifFrame *> pxs;
-    
-    int frameW, frameH;
+
     int nFrames;
     int maxFrames;
     int currentFrame;
