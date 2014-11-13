@@ -2,6 +2,7 @@
 
 #include "ofMain.h"
 #include "ofxGifEncoder.h"
+#include "ofxOpenCv.h"
 
 
 class ofApp : public ofBaseApp{
@@ -20,27 +21,16 @@ public:
     void windowResized(int w, int h);
     void dragEvent(ofDragInfo dragInfo);
     void gotMessage(ofMessage msg);
- 
+
 //--------------------------------------------------------------
-//    Screen Variables
+//    GIF Variables
 //--------------------------------------------------------------
     
-    bool bFullscreen;
-    int screenW;
-    int screenH;
-    
-//--------------------------------------------------------------
-//    Video Capture Variables
-//--------------------------------------------------------------
+//    ofxGifEncoder - Write
     
     ofVideoGrabber vid;
-    
-    int frameW, frameH;
-    
-//    Mirror & Rotate
-    
-    ofTexture mirrorTexture;
-    unsigned char * videoMirror;
+    ofxCvColorImage mirror;
+    ofxCvColorImage gifSize;
 
     
 //--------------------------------------------------------------
@@ -55,16 +45,19 @@ public:
     
     vector <ofTexture *> txs; // for previewing
     vector <ofxGifFrame *> pxs;
-
+    
+    int frameW, frameH;
     int nFrames;
     int maxFrames;
     int currentFrame;
     int currentGif;
     int checkGif;
     
+    int gifW, gifH;
+    
     string gifName;
     
-    ofxGifEncoder gifEncoder;
+       ofxGifEncoder gifEncoder;
     
 //  Load GIF
 
@@ -75,6 +68,9 @@ public:
 //    UI Variables
 //--------------------------------------------------------------
 
+    bool  	bFullscreen;
+    int screenW;
+    int screenH;
     
     void displayInstructions();
     

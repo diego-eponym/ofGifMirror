@@ -1,25 +1,24 @@
 #include "ofApp.h"
 
 
-
-// THIS IS A TEST FOR GIT - this should change
-
-
 //--------------------------------------------------------------
 void ofApp::setup(){
     
-//  Screen Setup
-    screenW = ofGetScreenWidth();
-    screenH = ofGetScreenHeight();
-    ofSetWindowPosition(screenW/2-300/2, screenH/2-300/2);
+//  SIZE SETUP
+    screenW = 1200; // SCREEN
+    screenH = 1920;
+    
+    frameW  = screenW; // VIDEO
+    frameH  = 3*frameW/4;
+    
+    gifW = 2*screenW/10; // GIF
+    gifH = 2*screenH/10;
     
 //  Sketch Setup
     ofBackground(0, 0, 0);
-    ofSetFrameRate(30);
+    ofSetFrameRate(24);
 
-//  Video Variables
-    frameW  = 1200; // Window size
-    frameH  = 3*frameW/4;
+
 
     
 //  GIF Setup
@@ -29,18 +28,21 @@ void ofApp::setup(){
     currentGif = 0;
     checkGif = 0;
     
+
+    
     
 // Capture Setup
-    vid.setVerbose(true);
+    //vid.setVerbose(true);
     vid.listDevices();
     vid.setDeviceID(0);
     vid.initGrabber(frameW,frameH);
+    
+    mirror.allocate(screenW, screenH);
+    gifSize.allocate(gifW, gifH);
 
-    videoMirror = new unsigned char[frameW*frameH*3];
-    mirrorTexture.allocate(frameW, frameH, GL_RGB);
     
 //GIF Capture setup
-    gifEncoder.setup(frameW, frameH, .85, 256);
+    gifEncoder.setup(gifW, gifH, .25, 256);
     ofAddListener(ofxGifEncoder::OFX_GIF_SAVE_FINISHED, this, &ofApp::onGifSaved);
     
     
@@ -70,11 +72,12 @@ void ofApp::update(){
         ofShowCursor();
     }
     
-      onScreenInst = ofToString(currentFrame) + "/" + ofToString(maxFrames);
+    vid.update();
+    onScreenInst = ofToString(currentFrame) + "/" + ofToString(maxFrames);
 
     if (checkGif != currentGif) {
         
-        ofSleepMillis(1500);
+        ofSleepMillis(1000);
         cout << "There's a new GIF" << endl;
         previousGif.loadMovie(gifName);
         cout << "Loaded to video: " + gifName << endl;
@@ -94,43 +97,30 @@ void ofApp::update(){
     }
     
 //    Video Mirror
-    vid.update();
-    if (vid.isFrameNew()) {
-        unsigned char * pixels = vid.getPixels();
-        for (int i = 0; i < frameH; i++) {
-            for (int j = 0; j < frameW*3; j+=3) {
-                // pixel number
-                int pix1 = (i*frameW*3) + j;
-                int pix2 = (i*frameW*3) + (j+1);
-                int pix3 = (i*frameW*3) + (j+2);
-                // mirror pixel number
-                int mir1 = (i*frameW*3)+1 * (frameW*3 - j-3);
-                int mir2 = (i*frameW*3)+1 * (frameW*3 - j-2);
-                int mir3 = (i*frameW*3)+1 * (frameW*3 - j-1);
-                // swap pixels
-                videoMirror[pix1] = pixels[mir1];
-                videoMirror[pix2] = pixels[mir2];
-                videoMirror[pix3] = pixels[mir3];
-            }
-        }
-        mirrorTexture.loadData(videoMirror, frameW, frameH, GL_RGB);
-    }
+    
+    mirror.setFromPixels(vid.getPixels(), frameW, frameH);
+    mirror.mirror(0, 1);
+    
+    mirror.resize(frameW, frameW);
+    mirror.rotate(90, frameW/2, frameW/2);
+    mirror.resize(1200, 1920);
+    
+    gifSize.setFromPixels(vid.getPixels(), frameW, frameH);
+    gifSize.mirror(0, 1);
+    
+    gifSize.resize(frameW, frameW);
+    gifSize.rotate(90, frameW/2, frameW/2);
+    gifSize.resize(gifW, gifH);
+
+    
     
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
     
-    ofSetupScreen();
     
-//    vid.draw(0, 0);
-    
-    mirrorTexture.draw(0, 0, frameW, frameH);
-
-//    Working on Cropping the video feed through the ofPixel::crop() method, need to find an example.
-//    ofPixelsRef pixelRef = vid.getPixelsRef();
-    
-    
+    mirror.draw(0, 0);
     
     ofSetColor(255, 255, 255);
     
@@ -149,8 +139,6 @@ void ofApp::onGifSaved(string &fileName) {
     
     gifEncoder.reset();
     cout << "Reset Gif" << endl;
-
-//    previousGif.play();
     
 }
 
@@ -163,10 +151,10 @@ void ofApp::captureFrame() {
     gifEncoder.addFrame(
                         
                         
-                        vid.getPixels(),
-                        vid.getWidth(),
-                        vid.getHeight(),
-                        vid.getPixelsRef().getBitsPerPixel(),
+                        gifSize.getPixels(),
+                        gifSize.getWidth(),
+                        gifSize.getHeight(),
+                        gifSize.getPixelsRef().getBitsPerPixel(),
                         .1f
                         );
     
@@ -180,21 +168,19 @@ void ofApp::captureFrame() {
 
 void ofApp::displayInstructions(){
     
-    //    I'm currently figuring out how to center text accurately and only once. Perhaps do thi in the setup and define custom variables for this stuff.
-    
     if (currentFrame == 0) {
         subHeadType = proximaNova12.getStringBoundingBox(gifStatusUI[0], 0, 0);
-        proximaNova12.drawString(gifStatusUI[0], frameW/2 - subHeadType.width/2, frameH + 30);
+        proximaNova12.drawString(gifStatusUI[0], screenW/2 - subHeadType.width/2, screenH - subHeadType.height/2 - 40);
         
-        previousGif.draw(frameW/2-80, frameH+100, 160, 120);
+        previousGif.draw(screenW/2 - gifW/2, screenH - gifH - 80, gifW, gifH);
         
     } else {
         
         subHeadType = proximaNova12.getStringBoundingBox(gifStatusUI[1], 0, 0);
-        proximaNova12.drawString(gifStatusUI[1], frameW/2 - subHeadType.width/2, frameH + 30);
+        proximaNova12.drawString(gifStatusUI[1],  screenW/2 - subHeadType.width/2, screenH - subHeadType.height/2 - 40);
         
         headType = baskervilleOldFace30.getStringBoundingBox(onScreenInst, 0, 0);
-        baskervilleOldFace30.drawString(onScreenInst, frameW/2 - headType.width/2, frameH + 250);
+        baskervilleOldFace30.drawString(onScreenInst, screenW/2 - headType.width/2, screenH - 250);
     }
 }
 
@@ -223,7 +209,8 @@ void ofApp::keyPressed(int key){
 void ofApp::keyReleased(int key){
     switch (key) {
         case ' ':
-            if (maxFrames <= currentFrame){
+            if (currentFrame == maxFrames -1){
+                captureFrame();
                 gifName = "images/CS-Gif" + ofToString(currentGif) + ".gif";
                 gifEncoder.save(gifName);
                 cout << "Saved: " + gifName << endl;
