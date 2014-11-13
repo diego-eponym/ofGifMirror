@@ -56,6 +56,8 @@ public:
 //--------------------------------------------------------------
 
     bool  	bFullscreen;
+    int screenW;
+    int screenH;
     
     void displayInstructions();
     
