@@ -20,6 +20,21 @@ public:
     void windowResized(int w, int h);
     void dragEvent(ofDragInfo dragInfo);
     void gotMessage(ofMessage msg);
+ 
+//--------------------------------------------------------------
+//    Screen Variables
+//--------------------------------------------------------------
+    
+    bool bFullscreen;
+    int screenW;
+    int screenH;
+    
+//--------------------------------------------------------------
+//    Video Capture Variables
+//--------------------------------------------------------------
+    
+    ofVideoGrabber vid;
+
     
 //--------------------------------------------------------------
 //    GIF Variables
@@ -43,7 +58,6 @@ public:
     
     string gifName;
     
-    ofVideoGrabber vid;
     ofxGifEncoder gifEncoder;
     
 //  Load GIF
@@ -55,9 +69,6 @@ public:
 //    UI Variables
 //--------------------------------------------------------------
 
-    bool  	bFullscreen;
-    int screenW;
-    int screenH;
     
     void displayInstructions();
     
