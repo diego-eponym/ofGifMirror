@@ -28,8 +28,9 @@ public:
     
     ofVideoGrabber vid;
     
-    ofxCvColorImage mirror;
     ofxCvColorImage gifSize;
+    
+    int horizCenter;
 
     
 //--------------------------------------------------------------

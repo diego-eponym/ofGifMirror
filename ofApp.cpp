@@ -11,8 +11,8 @@ void ofApp::setup(){
     frameW  = 1920; // VIDEO
     frameH  = 1080;
     
-    gifW = 2*screenW/10; // GIF
-    gifH = 2*screenH/10;
+    gifW = 2*frameH/10; // GIF
+    gifH = 2*frameW/10;
     
 //  Sketch Setup
     ofBackground(0, 0, 0);
@@ -36,9 +36,12 @@ void ofApp::setup(){
     vid.setDeviceID(0); // Change webcam here
     vid.initGrabber(frameW,frameH);
 
-    
-    mirror.allocate(screenW, screenH);
     gifSize.allocate(gifW, gifH);
+
+    
+//    Center Video
+    
+    horizCenter = screenW - (screenW - vid.getHeight())/2;
 
     
 //GIF Capture setup
@@ -96,31 +99,21 @@ void ofApp::update(){
         
     }
     
-////    Video Mirror - Working - Slow -
-//      Basically, this code works but is really taxing since it's doing three unnecessary transformations - source: http://forum.openframeworks.cc/t/pixel-rotation/10690/3?u=diegozaks
-    
-    mirror.setFromPixels(vid.getPixels(), frameW, frameH);
-    mirror.mirror(0, 1);
-    
-    mirror.resize(frameW, frameW);
-    mirror.rotate(90, frameW/2, frameW/2);
-    mirror.resize(1200, 1920);
-//
-//
-    
-    //    Video Mirror - Optimize Test - Have no idea how to get this to work. Source: http://forum.openframeworks.cc/t/pixel-rotation/10690/4?u=diegozaks
-    
-//    mirror.getPixelsRef().rotate90To(vid.getPixelsRef(), 1);
-    
-    
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
     
-
     
-    mirror.draw(0, 0);
+    ofPushMatrix();
+    
+    ofTranslate(0,0,0);
+    
+    ofRotateZ(90); // angle you want to rotate
+    
+    vid.draw(0, -horizCenter); // your video feed from the webcom
+
+    ofPopMatrix();
     
     ofSetColor(255, 255, 255);
     
