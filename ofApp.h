@@ -27,20 +27,21 @@ public:
 //--------------------------------------------------------------
     
     ofVideoGrabber vid;
-    
-    ofxCvColorImage gifSize;
-    
-    int horizCenter;
+    ofxCvColorImage mirror; // mirror needed
 
     vector<ofVideoDevice> devices;
     
     int selectCam;
+    int frameW, frameH;
+    int horizCenter;
     
 //--------------------------------------------------------------
 //    GIF Variables
 //--------------------------------------------------------------
 
 //    ofxGifEncoder - Write
+    
+    ofxCvColorImage gifSize;
     
     void onGifSaved(string & fileName);
     void exit();
@@ -49,7 +50,7 @@ public:
     vector <ofTexture *> txs; // for previewing
     vector <ofxGifFrame *> pxs;
     
-    int frameW, frameH;
+    
     int nFrames;
     int maxFrames;
     int currentFrame;
@@ -60,7 +61,7 @@ public:
     
     string gifName;
     
-       ofxGifEncoder gifEncoder;
+    ofxGifEncoder gifEncoder;
     
 //  Load GIF
 
@@ -78,6 +79,8 @@ public:
     
     void displayInstructions();
     void waitScreen();
+    
+    int waitOpacity;
     
     string gifStatusUI[2];
     string onScreenInst;

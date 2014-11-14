@@ -1,5 +1,8 @@
 #include "ofApp.h"
 
+// MISSING
+// Working on waitScreen();
+// Working on Main Video mirror. Currently not mirroring.
 
 //--------------------------------------------------------------
 void ofApp::setup(){
@@ -75,6 +78,8 @@ void ofApp::setup(){
     
     previousGif.loadMovie("testGif.gif");
     previousGif.play();
+    
+    waitOpacity = 0;
 }
 
 //--------------------------------------------------------------
@@ -87,6 +92,7 @@ void ofApp::update(){
     }
     
     vid.update();
+    
     onScreenInst = ofToString(currentFrame) + "/" + ofToString(maxFrames);
 
     
@@ -114,10 +120,14 @@ void ofApp::draw(){
     
     displayInstructions();
     
+    waitScreen();
+    
+    
     if (checkGif != currentGif) {
         
         // Need a better way to wait till the GIF is done saving before loading a it. Perhaps an intemediate UI screen saying "Saving Gif".
-        waitScreen();
+//        Current Issue, for some reason, calling     waitScreen(); does not actually display anything.
+    
         
         cout << "There's a new GIF" << endl;
         previousGif.loadMovie(gifName);
@@ -206,17 +216,28 @@ void ofApp::displayInstructions(){
 //--------------------------------------------------------------
 void ofApp::waitScreen() {
     
-    cout << "wait screen active" << endl;
+    if (waitOpacity != 0) {
+        for (int i = 0; i< 4; i++) {
+             waitOpacity--;
+        }
+       
+    }
     
-    ofSetColor(0, 0, 0);
+    ofEnableAlphaBlending();
+//    cout << "wait screen active" << endl;
+    ofSetColor(0, 0, 0, waitOpacity);
     ofFill();
     ofRect(0, 0, screenW, screenH);
     
-    ofSetColor(255, 255, 255);
+    ofSetColor(255, 255, 255, waitOpacity);
     subHeadType = proximaNova12.getStringBoundingBox("Saving", 0, 0);
     proximaNova12.drawString("Saving", screenW/2 - subHeadType.width/2, screenH - subHeadType.height/2 - 40);
+    ofDisableAlphaBlending();
     
-    ofSleepMillis(waitTime);
+    if (checkGif != currentGif) {
+        
+        ofSleepMillis(waitTime);
+    }
     
 }
 
@@ -243,10 +264,12 @@ void ofApp::keyPressed(int key){
         
         if(selectCam < devices.size()-1){
         selectCam++;
+            vid.close();
             vid.setDeviceID(selectCam); // Change webcam here
             vid.initGrabber(frameW,frameH);
         } else {
             selectCam = 0;
+            vid.close();
             vid.setDeviceID(selectCam); // Change webcam here
             vid.initGrabber(frameW,frameH);
         }
@@ -262,13 +285,18 @@ void ofApp::keyReleased(int key){
     switch (key) {
         case ' ':
             if (currentFrame == maxFrames -1){
+                
                 captureFrame();
+                waitOpacity = 255;
                 gifName = "images/CS-Gif" + ofToString(currentGif) + ".gif";
                 gifEncoder.save(gifName);
                 cout << "Saved: " + gifName << endl;
                 
                 currentFrame = 0;
                 currentGif++;
+                
+                
+                
                 
                 
                 break;
