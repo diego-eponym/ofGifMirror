@@ -32,6 +32,9 @@ public:
     
     int horizCenter;
 
+    vector<ofVideoDevice> devices;
+    
+    int selectCam;
     
 //--------------------------------------------------------------
 //    GIF Variables
@@ -62,6 +65,7 @@ public:
 //  Load GIF
 
     ofVideoPlayer previousGif;
+    int waitTime;
     
     
 //--------------------------------------------------------------
@@ -73,6 +77,7 @@ public:
     int screenH;
     
     void displayInstructions();
+    void waitScreen();
     
     string gifStatusUI[2];
     string onScreenInst;

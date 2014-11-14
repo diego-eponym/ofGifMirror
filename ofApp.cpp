@@ -18,8 +18,6 @@ void ofApp::setup(){
     ofBackground(0, 0, 0);
     ofSetFrameRate(30);
 
-
-
     
 //  GIF Setup
     nFrames = 0;
@@ -27,13 +25,26 @@ void ofApp::setup(){
     currentFrame = 0;
     currentGif = 0;
     checkGif = 0;
-    
+    waitTime = 1000;
 
-    
     
 // Capture Setup
     
-    vid.setDeviceID(0); // Change webcam here
+    //we can now get back a list of devices.
+    devices = vid.listDevices();
+    
+    for(int i = 0; i < devices.size(); i++){
+        cout << devices[i].id << ": " << devices[i].deviceName;
+        if( devices[i].bAvailable ){
+            cout << endl;
+        }else{
+            cout << " - unavailable " << endl;
+        }
+    }
+    
+    selectCam = 0; // Change webcam here
+    
+    vid.setDeviceID(selectCam);
     vid.initGrabber(frameW,frameH);
 
     gifSize.allocate(gifW, gifH);
@@ -78,26 +89,10 @@ void ofApp::update(){
     vid.update();
     onScreenInst = ofToString(currentFrame) + "/" + ofToString(maxFrames);
 
-    if (checkGif != currentGif) {
-        
-        ofSleepMillis(1000);
-        cout << "There's a new GIF" << endl;
-        previousGif.loadMovie(gifName);
-        cout << "Loaded to video: " + gifName << endl;
-        previousGif.play();
-        
-        checkGif = currentGif;
-    }
-    
-    previousGif.update();
     
     
-    if(!bFullscreen){
-        proximaNova12.drawString("press f to enter fullscreen", -140 + ofGetWidth()/2, ofGetHeight()/2);
-        proximaNova12.drawString("window is normal", -100 + ofGetWidth()/2, ofGetHeight() - 10);
-    } else {
-        
-    }
+    
+   
     
 }
 
@@ -119,7 +114,28 @@ void ofApp::draw(){
     
     displayInstructions();
     
-        ofDrawBitmapString(ofToString(ofGetFrameRate())+"fps", 10, 15);
+    if (checkGif != currentGif) {
+        
+        // Need a better way to wait till the GIF is done saving before loading a it. Perhaps an intemediate UI screen saying "Saving Gif".
+        waitScreen();
+        
+        cout << "There's a new GIF" << endl;
+        previousGif.loadMovie(gifName);
+        cout << "Loaded to video: " + gifName << endl;
+        previousGif.play();
+        
+        checkGif = currentGif;
+    }
+    
+    previousGif.update();
+    
+//    ofDrawBitmapString(ofToString(ofGetFrameRate())+"fps", 10, 15);
+    if(!bFullscreen){
+        ofDrawBitmapString("press f to enter fullscreen", 10, 15);
+        ofDrawBitmapString("window is normal", 10, 25);
+    } else {
+        
+    }
     
 }
 
@@ -186,6 +202,24 @@ void ofApp::displayInstructions(){
     }
 }
 
+
+//--------------------------------------------------------------
+void ofApp::waitScreen() {
+    
+    cout << "wait screen active" << endl;
+    
+    ofSetColor(0, 0, 0);
+    ofFill();
+    ofRect(0, 0, screenW, screenH);
+    
+    ofSetColor(255, 255, 255);
+    subHeadType = proximaNova12.getStringBoundingBox("Saving", 0, 0);
+    proximaNova12.drawString("Saving", screenW/2 - subHeadType.width/2, screenH - subHeadType.height/2 - 40);
+    
+    ofSleepMillis(waitTime);
+    
+}
+
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
     
@@ -203,6 +237,22 @@ void ofApp::keyPressed(int key){
         } else if(bFullscreen == 1){
             ofSetFullscreen(true);
         }
+    }
+    
+    if(key == 'c'){
+        
+        if(selectCam < devices.size()-1){
+        selectCam++;
+            vid.setDeviceID(selectCam); // Change webcam here
+            vid.initGrabber(frameW,frameH);
+        } else {
+            selectCam = 0;
+            vid.setDeviceID(selectCam); // Change webcam here
+            vid.initGrabber(frameW,frameH);
+        }
+        
+        
+       
     }
     
 }
