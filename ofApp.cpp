@@ -2,7 +2,6 @@
 
 // MISSING
 // Working on waitScreen();
-// Working on Main Video mirror. Currently not mirroring.
 
 //--------------------------------------------------------------
 void ofApp::setup(){
@@ -112,7 +111,7 @@ void ofApp::draw(){
     
     ofRotateZ(90); // angle you want to rotate
     
-    vid.draw(0, -horizCenter); // your video feed from the webcom
+    vid.draw(0, frameH-horizCenter, frameW, -frameH); // your video feed from the webcom
 
     ofPopMatrix();
     
