@@ -85,6 +85,8 @@ public:
     string gifStatusUI[2];
     string onScreenInst;
     
+    string waitMsg;
+    
     ofTrueTypeFont baskervilleOldFace30;
     ofTrueTypeFont proximaNova12;
     

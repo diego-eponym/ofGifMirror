@@ -2,16 +2,16 @@
 
 // MISSING
 // Working on waitScreen();
-
+ 
 //--------------------------------------------------------------
 void ofApp::setup(){
     
 //  SIZE SETUP
-    screenW = 1200; // SCREEN SIZE
-    screenH = 1920;
+    screenW = ofGetScreenWidth(); // SCREEN SIZE
+    screenH = ofGetScreenHeight();
     
-    frameW  = 1920; // VIDEO
-    frameH  = 1080;
+    frameW  = screenH; // VIDEO
+    frameH  = screenW;
     
     gifW = 2*frameH/10; // GIF
     gifH = 2*frameW/10;
@@ -23,14 +23,15 @@ void ofApp::setup(){
     
 //  GIF Setup
     nFrames = 0;
-    maxFrames = 5; // Total number of frames for the GIF - Limit
+    maxFrames = 4; // Total number of frames for the GIF - Limit
     currentFrame = 0;
     currentGif = 0;
     checkGif = 0;
     waitTime = 1000;
+    waitOpacity = 255;
 
     
-// Capture Setup
+//  Capture Setup
     
     //we can now get back a list of devices.
     devices = vid.listDevices();
@@ -52,17 +53,17 @@ void ofApp::setup(){
     gifSize.allocate(gifW, gifH);
 
     
-//    Center Video
+//  Center Video
     
     horizCenter = screenW - (screenW - vid.getHeight())/2;
 
     
-//GIF Capture setup
+//  GIF Capture setup
     gifEncoder.setup(gifW, gifH, .25, 256);
     ofAddListener(ofxGifEncoder::OFX_GIF_SAVE_FINISHED, this, &ofApp::onGifSaved);
     
     
-//    UI Setup
+//  UI Setup
     baskervilleOldFace30.loadFont("baskerville.ttf", 70, true, true);
     baskervilleOldFace30.setLineHeight(900.0f);
     baskervilleOldFace30.setLetterSpacing(1.037);
@@ -119,14 +120,10 @@ void ofApp::draw(){
     
     displayInstructions();
     
-    waitScreen();
+    waitScreen(); // issue with loading waitScreen() before saving GIF on last frame.
     
     
     if (checkGif != currentGif) {
-        
-        // Need a better way to wait till the GIF is done saving before loading a it. Perhaps an intemediate UI screen saying "Saving Gif".
-//        Current Issue, for some reason, calling     waitScreen(); does not actually display anything.
-    
         
         cout << "There's a new GIF" << endl;
         previousGif.loadMovie(gifName);
@@ -187,6 +184,15 @@ void ofApp::captureFrame() {
     
     
     nFrames++;
+    if (currentFrame == maxFrames -1) {
+        cout << "Last frame" << endl;
+        waitMsg = "GIF Saved!";
+        waitOpacity = 255;
+    } else {
+    cout << "Not yet" << endl;
+    waitMsg = "Saving frame";
+    waitOpacity = 150;
+    }
 }
 
 
@@ -229,8 +235,8 @@ void ofApp::waitScreen() {
     ofRect(0, 0, screenW, screenH);
     
     ofSetColor(255, 255, 255, waitOpacity);
-    subHeadType = proximaNova12.getStringBoundingBox("Saving", 0, 0);
-    proximaNova12.drawString("Saving", screenW/2 - subHeadType.width/2, screenH - subHeadType.height/2 - 40);
+    subHeadType = baskervilleOldFace30.getStringBoundingBox(waitMsg, 0, 0);
+    baskervilleOldFace30.drawString(waitMsg, screenW/2 - subHeadType.width/2, screenH/2 - subHeadType.height/2);
     ofDisableAlphaBlending();
     
     if (checkGif != currentGif) {
@@ -286,7 +292,6 @@ void ofApp::keyReleased(int key){
             if (currentFrame == maxFrames -1){
                 
                 captureFrame();
-                waitOpacity = 255;
                 gifName = "images/CS-Gif" + ofToString(currentGif) + ".gif";
                 gifEncoder.save(gifName);
                 cout << "Saved: " + gifName << endl;
@@ -294,15 +299,13 @@ void ofApp::keyReleased(int key){
                 currentFrame = 0;
                 currentGif++;
                 
-                
-                
-                
-                
                 break;
             }
+            
             captureFrame();
             currentFrame++;
             cout << "Added Frame" << endl;
+            
             
     }
 }
